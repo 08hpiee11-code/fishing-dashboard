@@ -61,6 +61,150 @@
     font-size: 12px;
     margin-top: 6px;
   }
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .sidebar { width: 100%; }
+  .main { width: 100%; min-width: 0; flex: 1; }
+  @media (min-width: 860px) {
+    .layout { flex-direction: row; }
+    .sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 16px; }
+  }
+
+  .calendar {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .cal-head .cal-title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cal-head button {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .cal-head button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-dow {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: 4px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-primary);
+    border: 1px solid transparent;
+    background: none;
+    font-family: inherit;
+    padding: 0;
+  }
+  .cal-day.blank { visibility: hidden; cursor: default; }
+  .cal-day.disabled {
+    color: var(--text-muted);
+    opacity: 0.35;
+    cursor: default;
+  }
+  .cal-day.today { border-color: var(--series-blue); }
+  .cal-day.selected {
+    background: var(--series-blue);
+    color: #fff;
+    font-weight: 700;
+    border-color: var(--series-blue);
+  }
+  .cal-day:not(.disabled):not(.blank):not(.selected):hover {
+    background: var(--series-blue-wash);
+  }
+  .reset-btn {
+    margin-top: 10px;
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .reset-btn:hover { color: var(--text-primary); }
+
+  .day-detail-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .day-detail-head h2 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+  }
+  .day-detail-head .count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .day-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .day-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  .day-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .day-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 4px 8px 4px 0;
+    border-bottom: 1px solid var(--gridline);
+    white-space: nowrap;
+  }
+  .day-table td {
+    padding: 6px 8px 6px 0;
+    border-bottom: 1px solid var(--gridline);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .day-table tr:last-child td { border-bottom: none; }
+
   .grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -69,7 +213,7 @@
   @media (min-width: 640px) {
     .grid { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (min-width: 980px) {
+  @media (min-width: 1280px) {
     .grid { grid-template-columns: repeat(3, 1fr); }
   }
   .card {
@@ -195,8 +339,16 @@
     <div id="updated-at">読み込み中…</div>
   </header>
 
-  <div class="grid" id="grid">
-    <div class="empty-note">データを読み込み中…</div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="calendar" id="calendar"></div>
+      <button class="reset-btn" id="reset-view" hidden>全期間の表示に戻す</button>
+    </aside>
+    <main class="main">
+      <div class="grid" id="grid">
+        <div class="empty-note">データを読み込み中…</div>
+      </div>
+    </main>
   </div>
 
   <footer>
@@ -218,13 +370,22 @@ const WEATHER_MAP = {
   95: ["雷雨", "⛈️"], 96: ["雷雨（ひょう）", "⛈️"], 99: ["雷雨（ひょう）", "⛈️"],
 };
 
+// Reading timestamps are always generated server-side with a +09:00 (JST)
+// offset. Pulling the fields straight out of the string (rather than going
+// through Date's local getHours()/getDate()) means the displayed time is
+// always JST, regardless of the viewer's own timezone.
+function parseISOJST(iso) {
+  const m = iso && iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (!m) return null;
+  return { y: +m[1], mo: +m[2], d: +m[3], hh: +m[4], mi: +m[5] };
+}
+
 function fmtDateTime(iso) {
-  if (!iso) return "―";
-  const d = new Date(iso);
-  const mm = d.getMonth() + 1, dd = d.getDate();
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mi = String(d.getMinutes()).padStart(2, "0");
-  return `${mm}/${dd} ${hh}:${mi}`;
+  const p = parseISOJST(iso);
+  if (!p) return "―";
+  const hh = String(p.hh).padStart(2, "0");
+  const mi = String(p.mi).padStart(2, "0");
+  return `${p.mo}/${p.d} ${hh}:${mi}`;
 }
 
 function fmtNum(v, digits = 1) {
@@ -243,7 +404,7 @@ function primaryMetric(readings) {
 
 function buildChart(container, tooltipEl, readings, metric) {
   const points = readings
-    .map(r => ({ t: new Date(r.time), v: r[metric.key] }))
+    .map(r => ({ t: new Date(r.time), jst: parseISOJST(r.time), v: r[metric.key] }))
     .filter(p => p.v !== null && p.v !== undefined && !Number.isNaN(p.v));
 
   const svgNS = "http://www.w3.org/2000/svg";
@@ -357,7 +518,7 @@ function buildChart(container, tooltipEl, readings, metric) {
     tooltipEl.innerHTML = "";
     const dateEl = document.createElement("div");
     dateEl.className = "t-date";
-    dateEl.textContent = `${p.t.getMonth()+1}/${p.t.getDate()} ${String(p.t.getHours()).padStart(2,"0")}:${String(p.t.getMinutes()).padStart(2,"0")}`;
+    dateEl.textContent = `${p.jst.mo}/${p.jst.d} ${String(p.jst.hh).padStart(2,"0")}:${String(p.jst.mi).padStart(2,"0")}`;
     const valEl = document.createElement("div");
     valEl.className = "t-val";
     valEl.textContent = `${metric.label} ${p.v.toFixed(2)}${metric.unit}`;
@@ -478,6 +639,227 @@ function renderCard(loc) {
   return card;
 }
 
+// ---- date helpers (all dates are JST calendar dates, "YYYY-MM-DD") ----
+
+function todayJST() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
+}
+
+function dateStrFromISO(iso) {
+  // reading timestamps are already generated with a +09:00 (JST) offset,
+  // so the calendar date is just the first 10 characters — no timezone
+  // math needed (and no risk of it disagreeing with a viewer's local TZ).
+  return iso.slice(0, 10);
+}
+
+function last30DaySet() {
+  const set = new Set();
+  const [y, m, d] = todayJST().split("-").map(Number);
+  const base = Date.UTC(y, m - 1, d);
+  const DAY = 86400000;
+  for (let i = 0; i < 30; i++) {
+    set.add(new Date(base - i * DAY).toISOString().slice(0, 10));
+  }
+  return set;
+}
+
+const DOW_JA = ["日", "月", "火", "水", "木", "金", "土"];
+
+function fmtDayHeading(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = DOW_JA[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `${y}年${m}月${d}日（${dow}）`;
+}
+
+// ---- calendar ----
+
+let calMonth = null;   // Date (UTC) for the 1st of the displayed month
+let selectedDate = null; // "YYYY-MM-DD" or null
+let validDates = null;   // Set of selectable date strings (last 30 days)
+
+function renderCalendar() {
+  const el = document.getElementById("calendar");
+  el.innerHTML = "";
+
+  const today = todayJST();
+  const y = calMonth.getUTCFullYear(), m = calMonth.getUTCMonth();
+  const currentMonthKey = `${y}-${String(m + 1).padStart(2, "0")}`;
+  const todayMonthKey = today.slice(0, 7);
+
+  const head = document.createElement("div");
+  head.className = "cal-head";
+  const prevBtn = document.createElement("button");
+  prevBtn.textContent = "‹";
+  prevBtn.setAttribute("aria-label", "前の月");
+  prevBtn.addEventListener("click", () => {
+    calMonth = new Date(Date.UTC(y, m - 1, 1));
+    renderCalendar();
+  });
+  const nextBtn = document.createElement("button");
+  nextBtn.textContent = "›";
+  nextBtn.setAttribute("aria-label", "次の月");
+  nextBtn.disabled = currentMonthKey >= todayMonthKey;
+  nextBtn.addEventListener("click", () => {
+    calMonth = new Date(Date.UTC(y, m + 1, 1));
+    renderCalendar();
+  });
+  const title = document.createElement("span");
+  title.className = "cal-title";
+  title.textContent = `${y}年${m + 1}月`;
+  head.appendChild(prevBtn);
+  head.appendChild(title);
+  head.appendChild(nextBtn);
+  el.appendChild(head);
+
+  const grid = document.createElement("div");
+  grid.className = "cal-grid";
+  for (const dow of DOW_JA) {
+    const dowEl = document.createElement("div");
+    dowEl.className = "cal-dow";
+    dowEl.textContent = dow;
+    grid.appendChild(dowEl);
+  }
+
+  const firstWeekday = new Date(Date.UTC(y, m, 1)).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+
+  for (let i = 0; i < firstWeekday; i++) {
+    const blank = document.createElement("span");
+    blank.className = "cal-day blank";
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${y}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const btn = document.createElement("button");
+    const classes = ["cal-day"];
+    const isValid = validDates.has(dateStr);
+    if (!isValid) classes.push("disabled");
+    if (dateStr === today) classes.push("today");
+    if (dateStr === selectedDate) classes.push("selected");
+    btn.className = classes.join(" ");
+    btn.textContent = String(day);
+    btn.disabled = !isValid;
+    if (isValid) {
+      btn.addEventListener("click", () => selectDate(dateStr));
+    }
+    grid.appendChild(btn);
+  }
+
+  el.appendChild(grid);
+}
+
+function selectDate(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar();
+  renderMain();
+  document.getElementById("reset-view").hidden = false;
+}
+
+function clearSelection() {
+  selectedDate = null;
+  renderCalendar();
+  renderMain();
+  document.getElementById("reset-view").hidden = true;
+}
+
+// ---- day-detail view ----
+
+function renderDayDetail(dateStr) {
+  const grid = document.getElementById("grid");
+  grid.className = "";
+  grid.innerHTML = "";
+
+  const head = document.createElement("div");
+  head.className = "day-detail-head";
+  const h2 = document.createElement("h2");
+  h2.textContent = fmtDayHeading(dateStr);
+  head.appendChild(h2);
+  grid.appendChild(head);
+
+  const cards = document.createElement("div");
+  cards.className = "day-cards";
+
+  for (const loc of locationsData) {
+    const readings = loc.readings || [];
+    const dayReadings = readings.filter(r => dateStrFromISO(r.time) === dateStr);
+    const metric = primaryMetric(readings);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const cardHead = document.createElement("div");
+    cardHead.className = "card-head";
+    const h3 = document.createElement("h2");
+    h3.textContent = loc.name;
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = loc.type === "river" ? "河川" : "ダム";
+    cardHead.appendChild(h3);
+    cardHead.appendChild(badge);
+    card.appendChild(cardHead);
+
+    if (!dayReadings.length) {
+      const note = document.createElement("div");
+      note.className = "empty-note";
+      note.textContent = "この日の記録はありません";
+      card.appendChild(note);
+    } else {
+      const table = document.createElement("table");
+      table.className = "day-table";
+      const thead = document.createElement("thead");
+      thead.innerHTML = `<tr><th>時刻</th><th>${metric.label}(${metric.unit})</th><th>降雨量(mm)</th><th>気温(℃)</th></tr>`;
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      for (const r of dayReadings) {
+        const tr = document.createElement("tr");
+        const jst = parseISOJST(r.time);
+        const timeStr = `${String(jst.hh).padStart(2, "0")}:${String(jst.mi).padStart(2, "0")}`;
+        const tdTime = document.createElement("td");
+        tdTime.textContent = timeStr;
+        const tdVal = document.createElement("td");
+        tdVal.textContent = fmtNum(r[metric.key], metric.unit === "%" ? 1 : 2);
+        const tdRain = document.createElement("td");
+        tdRain.textContent = fmtNum(r.rainfall_mm, 1);
+        const tdTemp = document.createElement("td");
+        tdTemp.textContent = r.weather ? fmtNum(r.weather.temp_c, 1) : "―";
+        tr.appendChild(tdTime);
+        tr.appendChild(tdVal);
+        tr.appendChild(tdRain);
+        tr.appendChild(tdTemp);
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      card.appendChild(table);
+    }
+
+    cards.appendChild(card);
+  }
+
+  grid.appendChild(cards);
+}
+
+function renderOverview() {
+  const grid = document.getElementById("grid");
+  grid.className = "grid";
+  grid.innerHTML = "";
+  for (const loc of locationsData) {
+    grid.appendChild(renderCard(loc));
+  }
+}
+
+function renderMain() {
+  if (selectedDate) {
+    renderDayDetail(selectedDate);
+  } else {
+    renderOverview();
+  }
+}
+
+// ---- bootstrap ----
+
+let locationsData = [];
+
 async function main() {
   const grid = document.getElementById("grid");
   const updatedAtEl = document.getElementById("updated-at");
@@ -492,18 +874,24 @@ async function main() {
 
   updatedAtEl.textContent = `最終更新: ${fmtDateTime(index.updated_at)}`;
 
-  grid.innerHTML = "";
+  locationsData = [];
   for (const locMeta of index.locations) {
     try {
       const loc = await fetch(`data/${locMeta.id}.json`, { cache: "no-store" }).then(r => r.json());
-      grid.appendChild(renderCard(loc));
+      locationsData.push(loc);
     } catch (e) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `<div class="card-head"><h2>${locMeta.name}</h2></div><div class="empty-note">読み込み失敗</div>`;
-      grid.appendChild(card);
+      locationsData.push({ id: locMeta.id, name: locMeta.name, type: locMeta.type, readings: [] });
     }
   }
+
+  validDates = last30DaySet();
+  const [ty, tm] = todayJST().split("-").map(Number);
+  calMonth = new Date(Date.UTC(ty, tm - 1, 1));
+  renderCalendar();
+
+  document.getElementById("reset-view").addEventListener("click", clearSelection);
+
+  renderMain();
 }
 
 main();

@@ -20,6 +20,7 @@ concurrency:
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +29,7 @@ jobs:
           python-version: "3.11"
 
       - name: Fetch latest readings
+        timeout-minutes: 8
         run: python3 scripts/fetch_data.py
 
       - name: Commit updated data

@@ -13,6 +13,7 @@ Weather comes from Open-Meteo (no API key required).
 import json
 import os
 import re
+import socket
 import sys
 import urllib.request
 import urllib.error
@@ -20,13 +21,20 @@ from datetime import datetime, timedelta, timezone
 
 JST = timezone(timedelta(hours=9))
 RETENTION_DAYS = 30
+HTTP_TIMEOUT = 15
+
+# Belt-and-suspenders: urlopen's timeout doesn't always cover DNS
+# resolution on every platform/resolver, so set a hard socket-level
+# default too. Without this a stalled DNS lookup can hang the whole
+# workflow run well past any per-request timeout.
+socket.setdefaulttimeout(HTTP_TIMEOUT)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 LOCATIONS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locations.json")
 
 
-def http_get(url, encoding="utf-8", timeout=30):
+def http_get(url, encoding="utf-8", timeout=HTTP_TIMEOUT):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (fishing-dashboard-bot)"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read()
@@ -234,6 +242,7 @@ def main():
 
     for loc in locations:
         loc_id = loc["id"]
+        print(f"[start] {loc_id}: fetching...", flush=True)
         data_path = os.path.join(DATA_DIR, f"{loc_id}.json")
         record = load_json(data_path, {"id": loc_id, "name": loc["name"], "type": loc["type"],
                                         "lat": loc["lat"], "lon": loc["lon"], "readings": []})
@@ -247,13 +256,13 @@ def main():
             fetcher = FETCHERS[loc["source"]]
             reading = fetcher(loc["source_id"])
         except Exception as e:
-            print(f"[warn] {loc_id}: failed to fetch site data: {e}", file=sys.stderr)
+            print(f"[warn] {loc_id}: failed to fetch site data: {e}", file=sys.stderr, flush=True)
 
         weather = None
         try:
             weather = fetch_weather(loc["lat"], loc["lon"])
         except Exception as e:
-            print(f"[warn] {loc_id}: failed to fetch weather: {e}", file=sys.stderr)
+            print(f"[warn] {loc_id}: failed to fetch weather: {e}", file=sys.stderr, flush=True)
 
         if reading is None and weather is None:
             print(f"[warn] {loc_id}: skipped, no data at all this run", file=sys.stderr)
@@ -270,7 +279,7 @@ def main():
         save_json(data_path, record)
         any_success = True
         print(f"[ok] {loc_id}: {reading['time']} water_level_m={reading.get('water_level_m')} "
-              f"storage_rate_pct={reading.get('storage_rate_pct')}")
+              f"storage_rate_pct={reading.get('storage_rate_pct')}", flush=True)
 
     index = {
         "updated_at": datetime.now(JST).isoformat(),

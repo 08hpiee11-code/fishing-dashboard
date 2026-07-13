@@ -393,13 +393,16 @@ function fmtNum(v, digits = 1) {
   return v.toFixed(digits);
 }
 
-// pick the metric that best represents "how full / how high" this spot is
-function primaryMetric(readings) {
+// Always lead with 貯水位／水位 (meters) so every card uses the same unit —
+// fall back to 貯水率 / 貯水量 only for the rare case a source has neither.
+function primaryMetric(readings, type) {
   const has = (key) => readings.some(r => r[key] !== null && r[key] !== undefined);
+  if (has("water_level_m")) {
+    return { key: "water_level_m", label: type === "river" ? "水位" : "貯水位", unit: "m" };
+  }
   if (has("storage_rate_pct")) return { key: "storage_rate_pct", label: "貯水率", unit: "%" };
-  if (has("water_level_m")) return { key: "water_level_m", label: "貯水位／水位", unit: "m" };
   if (has("storage_volume_1000m3")) return { key: "storage_volume_1000m3", label: "貯水量", unit: "千m³" };
-  return { key: "storage_rate_pct", label: "貯水率", unit: "%" };
+  return { key: "water_level_m", label: type === "river" ? "水位" : "貯水位", unit: "m" };
 }
 
 function buildChart(container, tooltipEl, readings, metric) {
@@ -552,7 +555,7 @@ function renderCard(loc) {
 
   const readings = loc.readings || [];
   const latest = readings.length ? readings[readings.length - 1] : null;
-  const metric = primaryMetric(readings);
+  const metric = primaryMetric(readings, loc.type);
   const typeLabel = loc.type === "river" ? "河川" : "ダム";
 
   const head = document.createElement("div");
@@ -783,7 +786,7 @@ function renderDayDetail(dateStr) {
   for (const loc of locationsData) {
     const readings = loc.readings || [];
     const dayReadings = readings.filter(r => dateStrFromISO(r.time) === dateStr);
-    const metric = primaryMetric(readings);
+    const metric = primaryMetric(readings, loc.type);
 
     const card = document.createElement("div");
     card.className = "card";

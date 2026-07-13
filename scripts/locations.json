@@ -3,8 +3,8 @@
     "id": "matsubara",
     "name": "松原ダム",
     "type": "dam",
-    "source": "mlit_dam",
-    "source_id": "609061289920020",
+    "source": "kyushu_dam_camdata",
+    "source_id": "1",
     "lat": 33.1944444,
     "lon": 130.9933333
   },

@@ -183,11 +183,47 @@ def fetch_oita_dam(source_id):
     return r
 
 
+CAMDATA_ROW_RE = re.compile(
+    r'<td[^>]*class="body\d"[^>]*>(\d{2})/(\d{2})\s+(\d{2}):(\d{2})</td>'
+    r'<td[^>]*class="body\d"[^>]*>([\d.]*)</td>.*?'
+    r'<td[^>]*class="body\d"[^>]*>([\d.]*)</td>.*?'
+    r'<td[^>]*class="body\d"[^>]*>([\d.]*)</td>.*?'
+    r'<td[^>]*class="body\d"[^>]*>([\d.]*)</td>.*?'
+    r'<td[^>]*class="body\d"[^>]*>([\d.]*)</td>'
+)
+
+
+def fetch_kyushu_dam_camdata(cno):
+    """筑後川ダム統合管理事務所 (Chikugo river dam office) camera+data page.
+    Gives actual 貯水位 (EL, meters) unlike the MLIT dam-quantities CGI,
+    which only reports 貯水率 (%) for this dam."""
+    url = f"https://www.qsr.mlit.go.jp/toukan/bousai/cgdweb/camdata.php?cno={cno}"
+    html = http_get(url, encoding="utf-8")
+    rows = CAMDATA_ROW_RE.findall(html)
+    if not rows:
+        raise RuntimeError("no data rows found on Kyushu dam camdata page")
+    last = rows[-1]
+    mo, d, h, mi = (int(x) for x in last[:4])
+    now = datetime.now(JST)
+    dt = datetime(now.year, mo, d, h, mi, tzinfo=JST)
+    if dt > now + timedelta(hours=1):
+        dt = dt.replace(year=dt.year - 1)
+    r = empty_reading()
+    r.update(
+        time=dt.isoformat(),
+        water_level_m=fnum(last[4]),
+        inflow_m3s=fnum(last[5]),
+        outflow_m3s=fnum(last[8]),
+    )
+    return r
+
+
 FETCHERS = {
     "mlit_dam": fetch_mlit_dam,
     "mlit_river": fetch_mlit_river,
     "yamaguchi_dam": fetch_yamaguchi_dam,
     "oita_dam": fetch_oita_dam,
+    "kyushu_dam_camdata": fetch_kyushu_dam_camdata,
 }
 
 

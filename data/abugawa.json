@@ -1,0 +1,24 @@
+{
+  "id": "abugawa",
+  "name": "阿武川ダム",
+  "type": "dam",
+  "lat": 34.3586111,
+  "lon": 131.4869444,
+  "readings": [
+    {
+      "time": "2026-07-13T14:40:00+09:00",
+      "water_level_m": 75.84,
+      "storage_rate_pct": 83.8,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": 10.35,
+      "outflow_m3s": 26.17,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 30.6,
+        "precip_mm": 0.0,
+        "weather_code": 0,
+        "wind_speed_ms": 6.7
+      }
+    }
+  ]
+}

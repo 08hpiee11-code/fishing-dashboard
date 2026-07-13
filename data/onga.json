@@ -1,0 +1,24 @@
+{
+  "id": "onga",
+  "name": "遠賀川（生見）",
+  "type": "river",
+  "lat": 33.7230556,
+  "lon": 130.6636111,
+  "readings": [
+    {
+      "time": "2026-07-13T15:40:00+09:00",
+      "water_level_m": -0.45,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 33.3,
+        "precip_mm": 0.0,
+        "weather_code": 1,
+        "wind_speed_ms": 7.4
+      }
+    }
+  ]
+}

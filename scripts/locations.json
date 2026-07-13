@@ -1,0 +1,56 @@
+[
+  {
+    "id": "matsubara",
+    "name": "松原ダム",
+    "type": "dam",
+    "source": "mlit_dam",
+    "source_id": "609061289920020",
+    "lat": 33.1944444,
+    "lon": 130.9933333
+  },
+  {
+    "id": "serikawa",
+    "name": "芹川ダム",
+    "type": "dam",
+    "source": "oita_dam",
+    "source_id": "9",
+    "lat": 33.1397583,
+    "lon": 131.4408472
+  },
+  {
+    "id": "abugawa",
+    "name": "阿武川ダム",
+    "type": "dam",
+    "source": "yamaguchi_dam",
+    "source_id": "021",
+    "lat": 34.3586111,
+    "lon": 131.4869444
+  },
+  {
+    "id": "onga",
+    "name": "遠賀川（生見）",
+    "type": "river",
+    "source": "mlit_river",
+    "source_id": "309011289902200",
+    "lat": 33.7230556,
+    "lon": 130.6636111
+  },
+  {
+    "id": "sugano",
+    "name": "菅野ダム",
+    "type": "dam",
+    "source": "yamaguchi_dam",
+    "source_id": "008",
+    "lat": 34.1413889,
+    "lon": 131.9030556
+  },
+  {
+    "id": "kitagawa",
+    "name": "北川ダム",
+    "type": "dam",
+    "source": "oita_dam",
+    "source_id": "8",
+    "lat": 32.7908028,
+    "lon": 131.6078639
+  }
+]

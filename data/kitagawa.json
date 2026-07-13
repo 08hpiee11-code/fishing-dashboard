@@ -1,0 +1,24 @@
+{
+  "id": "kitagawa",
+  "name": "北川ダム",
+  "type": "dam",
+  "lat": 32.7908028,
+  "lon": 131.6078639,
+  "readings": [
+    {
+      "time": "2026-07-13T15:50:00+09:00",
+      "water_level_m": 153.73,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 31.4,
+        "precip_mm": 0.0,
+        "weather_code": 2,
+        "wind_speed_ms": 5.2
+      }
+    }
+  ]
+}

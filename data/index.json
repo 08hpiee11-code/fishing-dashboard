@@ -1,0 +1,35 @@
+{
+  "updated_at": "2026-07-13T15:57:32.930656+09:00",
+  "locations": [
+    {
+      "id": "matsubara",
+      "name": "松原ダム",
+      "type": "dam"
+    },
+    {
+      "id": "serikawa",
+      "name": "芹川ダム",
+      "type": "dam"
+    },
+    {
+      "id": "abugawa",
+      "name": "阿武川ダム",
+      "type": "dam"
+    },
+    {
+      "id": "onga",
+      "name": "遠賀川（生見）",
+      "type": "river"
+    },
+    {
+      "id": "sugano",
+      "name": "菅野ダム",
+      "type": "dam"
+    },
+    {
+      "id": "kitagawa",
+      "name": "北川ダム",
+      "type": "dam"
+    }
+  ]
+}

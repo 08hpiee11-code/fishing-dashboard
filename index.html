@@ -143,8 +143,18 @@
     font-weight: 700;
     border-color: var(--series-blue);
   }
+  .cal-day.in-range {
+    background: var(--series-blue-wash);
+    border-radius: 2px;
+  }
   .cal-day:not(.disabled):not(.blank):not(.selected):hover {
     background: var(--series-blue-wash);
+  }
+  .cal-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    text-align: center;
   }
   .reset-btn {
     margin-top: 10px;
@@ -183,11 +193,20 @@
   @media (min-width: 640px) {
     .day-cards { grid-template-columns: repeat(2, 1fr); }
   }
+  .day-table-wrap {
+    max-height: 260px;
+    overflow-y: auto;
+  }
   .day-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
     margin-top: 8px;
+  }
+  .day-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--surface-1);
   }
   .day-table th {
     text-align: left;
@@ -674,11 +693,25 @@ function fmtDayHeading(dateStr) {
   return `${y}年${m}月${d}日（${dow}）`;
 }
 
+function fmtDateShort(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = DOW_JA[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `${m}/${d}（${dow}）`;
+}
+
+function daysBetween(a, b) {
+  const [ay, am, ad] = a.split("-").map(Number);
+  const [by, bm, bd] = b.split("-").map(Number);
+  return Math.round((Date.UTC(by, bm - 1, bd) - Date.UTC(ay, am - 1, ad)) / 86400000) + 1;
+}
+
 // ---- calendar ----
 
-let calMonth = null;   // Date (UTC) for the 1st of the displayed month
-let selectedDate = null; // "YYYY-MM-DD" or null
-let validDates = null;   // Set of selectable date strings (last 30 days)
+let calMonth = null;    // Date (UTC) for the 1st of the displayed month
+let rangeStart = null;  // "YYYY-MM-DD" or null
+let rangeEnd = null;    // "YYYY-MM-DD" or null
+let pickingEnd = false; // true after the first click, until the second click lands
+let validDates = null;  // Set of selectable date strings (last 30 days)
 
 function renderCalendar() {
   const el = document.getElementById("calendar");
@@ -739,36 +772,151 @@ function renderCalendar() {
     const isValid = validDates.has(dateStr);
     if (!isValid) classes.push("disabled");
     if (dateStr === today) classes.push("today");
-    if (dateStr === selectedDate) classes.push("selected");
+    if (rangeStart && rangeEnd) {
+      if (dateStr === rangeStart || dateStr === rangeEnd) classes.push("selected");
+      else if (dateStr > rangeStart && dateStr < rangeEnd) classes.push("in-range");
+    } else if (rangeStart && dateStr === rangeStart) {
+      classes.push("selected");
+    }
     btn.className = classes.join(" ");
     btn.textContent = String(day);
     btn.disabled = !isValid;
     if (isValid) {
-      btn.addEventListener("click", () => selectDate(dateStr));
+      btn.addEventListener("click", () => onDayClick(dateStr));
     }
     grid.appendChild(btn);
   }
 
   el.appendChild(grid);
+
+  if (pickingEnd) {
+    const hint = document.createElement("div");
+    hint.className = "cal-hint";
+    hint.textContent = "終了日を選んでください（同じ日をもう一度押すと1日だけ表示）";
+    el.appendChild(hint);
+  }
 }
 
-function selectDate(dateStr) {
-  selectedDate = dateStr;
+function onDayClick(dateStr) {
+  if (pickingEnd) {
+    if (dateStr < rangeStart) {
+      rangeEnd = rangeStart;
+      rangeStart = dateStr;
+    } else {
+      rangeEnd = dateStr;
+    }
+    pickingEnd = false;
+  } else {
+    rangeStart = dateStr;
+    rangeEnd = dateStr;
+    pickingEnd = true;
+  }
   renderCalendar();
   renderMain();
   document.getElementById("reset-view").hidden = false;
 }
 
 function clearSelection() {
-  selectedDate = null;
+  rangeStart = null;
+  rangeEnd = null;
+  pickingEnd = false;
   renderCalendar();
   renderMain();
   document.getElementById("reset-view").hidden = true;
 }
 
-// ---- day-detail view ----
+// ---- range-detail view (chart zoomed to the selected date range) ----
 
-function renderDayDetail(dateStr) {
+function buildRangeCard(loc, startStr, endStr) {
+  const readings = loc.readings || [];
+  const rangeReadings = readings.filter(r => {
+    const d = dateStrFromISO(r.time);
+    return d >= startStr && d <= endStr;
+  });
+  const metric = primaryMetric(readings, loc.type);
+
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const cardHead = document.createElement("div");
+  cardHead.className = "card-head";
+  const h3 = document.createElement("h2");
+  h3.textContent = loc.name;
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = loc.type === "river" ? "河川" : "ダム";
+  cardHead.appendChild(h3);
+  cardHead.appendChild(badge);
+  card.appendChild(cardHead);
+
+  if (!rangeReadings.length) {
+    const note = document.createElement("div");
+    note.className = "empty-note";
+    note.textContent = "この期間の記録はありません";
+    card.appendChild(note);
+    return card;
+  }
+
+  const statLabel = document.createElement("div");
+  statLabel.className = "stat-label";
+  statLabel.textContent = `${metric.label}(${metric.unit}) の推移`;
+  card.appendChild(statLabel);
+
+  const chartWrap = document.createElement("div");
+  chartWrap.className = "chart-wrap";
+  const tooltip = document.createElement("div");
+  tooltip.className = "tooltip";
+  chartWrap.appendChild(tooltip);
+  card.appendChild(chartWrap);
+
+  if (rangeReadings.length >= 2) {
+    buildChart(chartWrap, tooltip, rangeReadings, metric);
+  } else {
+    const note = document.createElement("div");
+    note.className = "empty-note";
+    note.textContent = "この期間の記録が1件のみのため、グラフは表示できません";
+    chartWrap.appendChild(note);
+  }
+
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "day-table-wrap";
+  const table = document.createElement("table");
+  table.className = "day-table";
+  const multiDay = startStr !== endStr;
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>${multiDay ? "<th>日付</th>" : ""}<th>時刻</th><th>${metric.label}(${metric.unit})</th><th>降雨量(mm)</th><th>気温(℃)</th></tr>`;
+  table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  for (const r of rangeReadings) {
+    const tr = document.createElement("tr");
+    const jst = parseISOJST(r.time);
+    if (multiDay) {
+      const tdDate = document.createElement("td");
+      tdDate.textContent = `${jst.mo}/${jst.d}`;
+      tr.appendChild(tdDate);
+    }
+    const tdTime = document.createElement("td");
+    tdTime.textContent = `${String(jst.hh).padStart(2, "0")}:${String(jst.mi).padStart(2, "0")}`;
+    const tdVal = document.createElement("td");
+    tdVal.textContent = fmtNum(r[metric.key], metric.unit === "%" ? 1 : 2);
+    const tdRain = document.createElement("td");
+    tdRain.textContent = fmtNum(r.rainfall_mm, 1);
+    const tdTemp = document.createElement("td");
+    tdTemp.textContent = r.weather ? fmtNum(r.weather.temp_c, 1) : "―";
+    tr.appendChild(tdTime);
+    tr.appendChild(tdVal);
+    tr.appendChild(tdRain);
+    tr.appendChild(tdTemp);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  card.appendChild(tableWrap);
+
+  return card;
+}
+
+function renderRangeDetail(startStr, endStr) {
   const grid = document.getElementById("grid");
   grid.className = "";
   grid.innerHTML = "";
@@ -776,69 +924,24 @@ function renderDayDetail(dateStr) {
   const head = document.createElement("div");
   head.className = "day-detail-head";
   const h2 = document.createElement("h2");
-  h2.textContent = fmtDayHeading(dateStr);
+  const isSingleDay = startStr === endStr;
+  h2.textContent = isSingleDay
+    ? fmtDayHeading(startStr)
+    : `${fmtDateShort(startStr)} 〜 ${fmtDateShort(endStr)}`;
   head.appendChild(h2);
+  if (!isSingleDay) {
+    const count = document.createElement("span");
+    count.className = "count";
+    count.textContent = `（${daysBetween(startStr, endStr)}日間）`;
+    head.appendChild(count);
+  }
   grid.appendChild(head);
 
   const cards = document.createElement("div");
   cards.className = "day-cards";
-
   for (const loc of locationsData) {
-    const readings = loc.readings || [];
-    const dayReadings = readings.filter(r => dateStrFromISO(r.time) === dateStr);
-    const metric = primaryMetric(readings, loc.type);
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const cardHead = document.createElement("div");
-    cardHead.className = "card-head";
-    const h3 = document.createElement("h2");
-    h3.textContent = loc.name;
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = loc.type === "river" ? "河川" : "ダム";
-    cardHead.appendChild(h3);
-    cardHead.appendChild(badge);
-    card.appendChild(cardHead);
-
-    if (!dayReadings.length) {
-      const note = document.createElement("div");
-      note.className = "empty-note";
-      note.textContent = "この日の記録はありません";
-      card.appendChild(note);
-    } else {
-      const table = document.createElement("table");
-      table.className = "day-table";
-      const thead = document.createElement("thead");
-      thead.innerHTML = `<tr><th>時刻</th><th>${metric.label}(${metric.unit})</th><th>降雨量(mm)</th><th>気温(℃)</th></tr>`;
-      table.appendChild(thead);
-      const tbody = document.createElement("tbody");
-      for (const r of dayReadings) {
-        const tr = document.createElement("tr");
-        const jst = parseISOJST(r.time);
-        const timeStr = `${String(jst.hh).padStart(2, "0")}:${String(jst.mi).padStart(2, "0")}`;
-        const tdTime = document.createElement("td");
-        tdTime.textContent = timeStr;
-        const tdVal = document.createElement("td");
-        tdVal.textContent = fmtNum(r[metric.key], metric.unit === "%" ? 1 : 2);
-        const tdRain = document.createElement("td");
-        tdRain.textContent = fmtNum(r.rainfall_mm, 1);
-        const tdTemp = document.createElement("td");
-        tdTemp.textContent = r.weather ? fmtNum(r.weather.temp_c, 1) : "―";
-        tr.appendChild(tdTime);
-        tr.appendChild(tdVal);
-        tr.appendChild(tdRain);
-        tr.appendChild(tdTemp);
-        tbody.appendChild(tr);
-      }
-      table.appendChild(tbody);
-      card.appendChild(table);
-    }
-
-    cards.appendChild(card);
+    cards.appendChild(buildRangeCard(loc, startStr, endStr));
   }
-
   grid.appendChild(cards);
 }
 
@@ -852,8 +955,8 @@ function renderOverview() {
 }
 
 function renderMain() {
-  if (selectedDate) {
-    renderDayDetail(selectedDate);
+  if (rangeStart && rangeEnd) {
+    renderRangeDetail(rangeStart, rangeEnd);
   } else {
     renderOverview();
   }

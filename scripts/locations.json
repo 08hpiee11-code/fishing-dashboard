@@ -6,7 +6,8 @@
     "source": "kyushu_dam_camdata",
     "source_id": "1",
     "lat": 33.1944444,
-    "lon": 130.9933333
+    "lon": 130.9933333,
+    "boat_baseline_m": 240
   },
   {
     "id": "serikawa",
@@ -15,7 +16,8 @@
     "source": "oita_dam",
     "source_id": "9",
     "lat": 33.1397583,
-    "lon": 131.4408472
+    "lon": 131.4408472,
+    "boat_baseline_m": 330
   },
   {
     "id": "abugawa",
@@ -51,6 +53,25 @@
     "source": "oita_dam",
     "source_id": "8",
     "lat": 32.7908028,
-    "lon": 131.6078639
+    "lon": 131.6078639,
+    "boat_baseline_m": 148.5
+  },
+  {
+    "id": "masubuchi",
+    "name": "鱒渕ダム",
+    "type": "dam",
+    "source": "fukuoka_dam",
+    "source_id": "8",
+    "lat": 33.761898,
+    "lon": 130.83907
+  },
+  {
+    "id": "yuki",
+    "name": "油木ダム",
+    "type": "dam",
+    "source": "fukuoka_dam",
+    "source_id": "3",
+    "lat": 33.555562,
+    "lon": 130.894973
   }
 ]

@@ -1040,5 +1040,6 @@
         "wind_speed_ms": 3.3
       }
     }
-  ]
+  ],
+  "boat_baseline_m": 330
 }

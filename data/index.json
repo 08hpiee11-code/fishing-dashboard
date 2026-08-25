@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-25T06:21:59.167188+09:00",
+  "updated_at": "2026-08-25T13:48:49.353413+09:00",
   "locations": [
     {
       "id": "matsubara",
@@ -29,6 +29,16 @@
     {
       "id": "kitagawa",
       "name": "北川ダム",
+      "type": "dam"
+    },
+    {
+      "id": "masubuchi",
+      "name": "鱒渕ダム",
+      "type": "dam"
+    },
+    {
+      "id": "yuki",
+      "name": "油木ダム",
       "type": "dam"
     }
   ]

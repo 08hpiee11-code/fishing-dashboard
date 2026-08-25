@@ -8,6 +8,8 @@ Data sources:
   - mlit_river  : MLIT river.go.jp real-time water level CGI (DspWaterData.exe)
   - yamaguchi_dam: Yamaguchi prefecture dam observation site
   - oita_dam    : Oita prefecture dam observation site
+  - kyushu_dam_camdata: Chikugo river dam office camera+data page
+  - fukuoka_dam : Fukuoka prefecture dam observation site (doboku-bousai)
 Weather comes from Open-Meteo (no API key required).
 """
 import json
@@ -218,12 +220,45 @@ def fetch_kyushu_dam_camdata(cno):
     return r
 
 
+FUKUOKA_DAM_ROW_RE = re.compile(
+    r'<td class="ui-bar-g">(\d{2})/(\d{2})&nbsp;(\d{2}):(\d{2})</td>'
+    r'<td class="ui-bar-g\s*">.*?([\d.]+)</td>'
+    r'<td class="ui-bar-g\s*">.*?([\d.]+)</td>'
+    r'<td class="ui-bar-g\s*">.*?([\d.]+)</td>',
+    re.S,
+)
+
+
+def fetch_fukuoka_dam(source_id):
+    """福岡県総合防災情報 dam observation page. HTTPS is not served (connect
+    fails), so this must stay on http://."""
+    url = f"http://doboku-bousai.pref.fukuoka.lg.jp/sp/graph/dam_graph_{source_id}.html"
+    html = http_get(url, encoding="shift_jis")
+    m = FUKUOKA_DAM_ROW_RE.search(html)
+    if not m:
+        raise RuntimeError("no data row found on Fukuoka dam page")
+    mo, d, h, mi, level, inflow, outflow = m.groups()
+    now = datetime.now(JST)
+    dt = datetime(now.year, int(mo), int(d), int(h), int(mi), tzinfo=JST)
+    if dt > now + timedelta(hours=1):
+        dt = dt.replace(year=dt.year - 1)
+    r = empty_reading()
+    r.update(
+        time=dt.isoformat(),
+        water_level_m=fnum(level),
+        inflow_m3s=fnum(inflow),
+        outflow_m3s=fnum(outflow),
+    )
+    return r
+
+
 FETCHERS = {
     "mlit_dam": fetch_mlit_dam,
     "mlit_river": fetch_mlit_river,
     "yamaguchi_dam": fetch_yamaguchi_dam,
     "oita_dam": fetch_oita_dam,
     "kyushu_dam_camdata": fetch_kyushu_dam_camdata,
+    "fukuoka_dam": fetch_fukuoka_dam,
 }
 
 
@@ -286,6 +321,8 @@ def main():
         record["type"] = loc["type"]
         record["lat"] = loc["lat"]
         record["lon"] = loc["lon"]
+        if "boat_baseline_m" in loc:
+            record["boat_baseline_m"] = loc["boat_baseline_m"]
 
         reading = None
         try:

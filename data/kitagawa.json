@@ -969,6 +969,21 @@
         "weather_code": 1,
         "wind_speed_ms": 7.1
       }
+    },
+    {
+      "time": "2026-08-26T15:20:00+09:00",
+      "water_level_m": 144.06,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 27.2,
+        "precip_mm": 0.2,
+        "weather_code": 53,
+        "wind_speed_ms": 8.4
+      }
     }
   ],
   "boat_baseline_m": 148.5

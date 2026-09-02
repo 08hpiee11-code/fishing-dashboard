@@ -294,6 +294,16 @@
         "weather_code": 1,
         "wind_speed_ms": 7.4
       }
+    },
+    {
+      "time": "2026-09-03T07:00:00+09:00",
+      "water_level_m": 149.69,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": 0.35,
+      "outflow_m3s": 0.65,
+      "rainfall_mm": null,
+      "weather": null
     }
   ]
 }

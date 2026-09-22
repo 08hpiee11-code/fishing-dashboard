@@ -1099,6 +1099,16 @@
       "outflow_m3s": 0.1,
       "rainfall_mm": null,
       "weather": null
+    },
+    {
+      "time": "2026-09-22T17:00:00+09:00",
+      "water_level_m": 148.95,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": 0.09,
+      "outflow_m3s": 0.1,
+      "rainfall_mm": null,
+      "weather": null
     }
   ]
 }

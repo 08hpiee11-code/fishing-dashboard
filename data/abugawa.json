@@ -924,6 +924,16 @@
         "weather_code": 51,
         "wind_speed_ms": 6.4
       }
+    },
+    {
+      "time": "2026-10-21T22:00:00+09:00",
+      "water_level_m": 67.11,
+      "storage_rate_pct": 27.3,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": 5.87,
+      "outflow_m3s": 8.97,
+      "rainfall_mm": null,
+      "weather": null
     }
   ]
 }

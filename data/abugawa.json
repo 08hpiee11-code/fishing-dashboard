@@ -6,16 +6,6 @@
   "lon": 131.4869444,
   "readings": [
     {
-      "time": "2026-09-24T15:50:00+09:00",
-      "water_level_m": 69.42,
-      "storage_rate_pct": 58.1,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": 3.38,
-      "outflow_m3s": 0.0,
-      "rainfall_mm": null,
-      "weather": null
-    },
-    {
       "time": "2026-09-24T21:40:00+09:00",
       "water_level_m": 69.34,
       "storage_rate_pct": 57.8,
@@ -933,6 +923,21 @@
         "precip_mm": 0.1,
         "weather_code": 51,
         "wind_speed_ms": 5.4
+      }
+    },
+    {
+      "time": "2026-10-24T15:30:00+09:00",
+      "water_level_m": 67.01,
+      "storage_rate_pct": 27.1,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": 5.33,
+      "outflow_m3s": 0.0,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 23.3,
+        "precip_mm": 0.3,
+        "weather_code": 55,
+        "wind_speed_ms": 10.4
       }
     }
   ]

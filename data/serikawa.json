@@ -6,76 +6,6 @@
   "lon": 131.4408472,
   "readings": [
     {
-      "time": "2026-10-14T09:00:00+09:00",
-      "water_level_m": 330.72,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 19.5,
-        "precip_mm": 0.0,
-        "weather_code": 1,
-        "wind_speed_ms": 10.0
-      }
-    },
-    {
-      "time": "2026-10-14T17:10:00+09:00",
-      "water_level_m": 330.73,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 16.8,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 8.9
-      }
-    },
-    {
-      "time": "2026-10-14T23:10:00+09:00",
-      "water_level_m": 330.73,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 13.6,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 5.3
-      }
-    },
-    {
-      "time": "2026-10-15T08:30:00+09:00",
-      "water_level_m": 330.73,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": null
-    },
-    {
-      "time": "2026-10-15T16:50:00+09:00",
-      "water_level_m": 330.73,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 18.7,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 3.9
-      }
-    },
-    {
       "time": "2026-10-15T22:40:00+09:00",
       "water_level_m": 330.73,
       "storage_rate_pct": null,
@@ -898,6 +828,21 @@
         "precip_mm": 0.0,
         "weather_code": 2,
         "wind_speed_ms": 3.6
+      }
+    },
+    {
+      "time": "2026-11-14T18:42:07.319129+09:00",
+      "water_level_m": null,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 15.9,
+        "precip_mm": 0.0,
+        "weather_code": 3,
+        "wind_speed_ms": 5.5
       }
     }
   ],

@@ -6,61 +6,6 @@
   "lon": 130.894973,
   "readings": [
     {
-      "time": "2026-10-17T21:00:00+09:00",
-      "water_level_m": 189.41,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": 0.56,
-      "outflow_m3s": 0.81,
-      "rainfall_mm": null,
-      "weather": null
-    },
-    {
-      "time": "2026-10-18T07:00:00+09:00",
-      "water_level_m": 189.39,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": 0.82,
-      "outflow_m3s": 0.82,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 18.3,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 1.9
-      }
-    },
-    {
-      "time": "2026-10-18T16:00:00+09:00",
-      "water_level_m": 189.36,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": 0.03,
-      "outflow_m3s": 0.82,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 25.8,
-        "precip_mm": 0.0,
-        "weather_code": 1,
-        "wind_speed_ms": 3.9
-      }
-    },
-    {
-      "time": "2026-10-18T21:00:00+09:00",
-      "water_level_m": 189.35,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": 0.44,
-      "outflow_m3s": 0.81,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 21.3,
-        "precip_mm": 0.0,
-        "weather_code": 2,
-        "wind_speed_ms": 4.7
-      }
-    },
-    {
       "time": "2026-10-19T07:00:00+09:00",
       "water_level_m": 189.32,
       "storage_rate_pct": null,
@@ -983,6 +928,21 @@
         "precip_mm": 0.0,
         "weather_code": 0,
         "wind_speed_ms": 7.2
+      }
+    },
+    {
+      "time": "2026-11-18T03:02:02.616858+09:00",
+      "water_level_m": null,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 12.5,
+        "precip_mm": 0.0,
+        "weather_code": 2,
+        "wind_speed_ms": 4.2
       }
     }
   ]

@@ -6,61 +6,6 @@
   "lon": 131.6078639,
   "readings": [
     {
-      "time": "2026-10-17T21:30:00+09:00",
-      "water_level_m": 151.58,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 17.6,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 6.6
-      }
-    },
-    {
-      "time": "2026-10-18T07:40:00+09:00",
-      "water_level_m": 151.53,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 20.4,
-        "precip_mm": 0.0,
-        "weather_code": 2,
-        "wind_speed_ms": 2.2
-      }
-    },
-    {
-      "time": "2026-10-18T16:30:00+09:00",
-      "water_level_m": 151.52,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": {
-        "temp_c": 24.3,
-        "precip_mm": 0.0,
-        "weather_code": 0,
-        "wind_speed_ms": 9.3
-      }
-    },
-    {
-      "time": "2026-10-18T21:50:00+09:00",
-      "water_level_m": 151.43,
-      "storage_rate_pct": null,
-      "storage_volume_1000m3": null,
-      "inflow_m3s": null,
-      "outflow_m3s": null,
-      "rainfall_mm": null,
-      "weather": null
-    },
-    {
       "time": "2026-10-19T07:40:00+09:00",
       "water_level_m": 151.47,
       "storage_rate_pct": null,
@@ -803,6 +748,21 @@
         "precip_mm": 0.0,
         "weather_code": 0,
         "wind_speed_ms": 5.7
+      }
+    },
+    {
+      "time": "2026-11-18T03:01:59.317710+09:00",
+      "water_level_m": null,
+      "storage_rate_pct": null,
+      "storage_volume_1000m3": null,
+      "inflow_m3s": null,
+      "outflow_m3s": null,
+      "rainfall_mm": null,
+      "weather": {
+        "temp_c": 13.6,
+        "precip_mm": 0.0,
+        "weather_code": 2,
+        "wind_speed_ms": 0.4
       }
     }
   ],
